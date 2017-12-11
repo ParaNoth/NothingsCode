@@ -1,0 +1,33 @@
+clc;
+clear;
+%生成训练集
+i=[1:0.5:500];
+p=randperm(999);
+ptrain = p(1:950);
+peval = p(951:end);
+sam_num = length(ptrain);
+test_num = length(peval);
+N = 2*sam_num;
+x1=(1/25).*(i+8).*cos(2*pi/25.*(i+8)-0.25*pi);
+y1=(1/25).*(i+8).*sin(2*pi/25.*(i+8)-0.25*pi)-0.25;
+x2=(-1/25).*(i+8).*sin(2*pi/25.*(i+8)+0.25*pi);
+y2=(1/25).*(i+8).*cos(2*pi/25.*(i+8)+0.25*pi)-0.25;
+positive_sample = [x1',y1'];
+negetive_sample = [x2',y2'];
+Xp = [positive_sample(ptrain,:);negetive_sample(ptrain,:)];
+Dp = [ones(sam_num,1);-ones(sam_num,1)];
+Xt = [positive_sample(peval,:);negetive_sample(peval,:)];
+Dt = [ones(test_num,1);-ones(test_num,1)];
+sigma = 0.4;
+[b0,ap] = nothingsSVMtrainer(Xp,Dp,sigma);
+yp = nothingsSVMtester(b0,ap,Xp,Dp,sigma,Xp);
+yt = nothingsSVMtester(b0,ap,Xp,Dp,sigma,Xt);
+
+figure,plot3(Xp(1:sam_num,1),Xp(1:sam_num,2),yp(1:sam_num),'.');
+hold on;
+plot3(Xp(sam_num+1:end,1),Xp(sam_num+1:end,2),yp(sam_num+1:end),'.');
+title('训练集结果');
+figure,plot3(Xt(1:test_num,1),Xt(1:test_num,2),yt(1:test_num),'.');
+hold on;
+plot3(Xt(test_num+1:end,1),Xt(test_num+1:end,2),yt(test_num+1:end),'.');
+title('测试集结果');
